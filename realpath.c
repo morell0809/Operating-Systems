@@ -2,6 +2,7 @@
 // Created by morell on 19.02.17.
 //
 #include <stdio.h>
+#include <libgen.h>
 #include "strings.h"
 #include <dirent.h>
 #include <sys/stat.h>
@@ -14,7 +15,10 @@ void inum_to_name(ino_t, string* , int);
 
 int main()
 {
+    char* buf = (char*) malloc(BUFSIZ);
+    getcwd(buf,BUFSIZ);
     string* res = (string*) malloc( sizeof(string));
+    char_init(res,"");
     printf("%d\n",BUFSIZ);
     print_path_to(get_inode("."),res);
     reverse(res);
@@ -41,6 +45,10 @@ void print_path_to( ino_t this_inod, string* res )
             fprintf(stderr,"Bad up");
         }
     }
+    inum_to_name(this_inod,its_name,BUFSIZ);// Получить имя католога
+    reverse(its_name);
+    cat_str(res,its_name);
+    append(res,'/');
     free(its_name);
 }
 
@@ -68,6 +76,12 @@ void inum_to_name(ino_t inode_to_find, string* its_name, int size )
             closedir(dir_ptr);
             return;
         }
+    }
+    dir_ptr = opendir(".");
+    // Ищем католог для файла с заданным inode_to_find
+    while((direntp = readdir(dir_ptr)) != 0 ) {
+        printf("%s",direntp->d_name);
+
     }
     printf(stderr,"Error find inode");
     exit(1);
