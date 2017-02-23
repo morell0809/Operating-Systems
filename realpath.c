@@ -15,11 +15,8 @@ void inum_to_name(ino_t, string* , int);
 
 int main()
 {
-    char* buf = (char*) malloc(BUFSIZ);
-    getcwd(buf,BUFSIZ);
     string* res = (string*) malloc( sizeof(string));
     char_init(res,"");
-    printf("%d\n",BUFSIZ);
     print_path_to(get_inode("."),res);
     reverse(res);
     print(res);
@@ -45,10 +42,6 @@ void print_path_to( ino_t this_inod, string* res )
             fprintf(stderr,"Bad up");
         }
     }
-    inum_to_name(this_inod,its_name,BUFSIZ);// Получить имя католога
-    reverse(its_name);
-    cat_str(res,its_name);
-    append(res,'/');
     free(its_name);
 }
 
@@ -83,7 +76,7 @@ void inum_to_name(ino_t inode_to_find, string* its_name, int size )
         printf("%s",direntp->d_name);
 
     }
-    printf(stderr,"Error find inode");
+    fprintf(stderr,"Error find inode");
     exit(1);
 }
 
