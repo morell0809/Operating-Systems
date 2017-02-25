@@ -13,7 +13,6 @@ ino_t get_inode( char* );
 // Верх. путь
 void pwd(ino_t, string* );
 void inum_to_name(ino_t, string* , int);
-//
 // Пропускает все delim version = 1, выравнить на последний version = 0
 int skip_delim( string* , int , char, int version );
 // Выравнивает на след. delim
@@ -41,24 +40,26 @@ int main()
                 string* realdown = (string*) malloc(sizeof(string));
                 front_add(&sub_path,"/");
                 // Верхний путь
-                /*pwd(get_inode("."),realup);
+               // print_dir_char(".");
+                pwd(get_inode("."),realup);
                 reverse(realup);
-                print_dir_char(".");
-                print_dir(realup);
-                chdir(realup->str);
-                print_dir_char(".");*/
+               // print_dir_char(".");
+              // // print_dir(realup);
+                //chdir("/home/morell/.CLion2016.2/system/cmake/generated/Str-be78cd4a/be78cd4a/Debug/Strings");
+                //print_dir_char("/home/morell/.CLion2016.2/system/cmake/generated/Str-be78cd4a/be78cd4a/Debug/Strings");
                 // Нижний путь.
                 append(realdown, '/' );
-                pwddown(realdown,sub_path,0);
+                cat_str(realup,sub_path);
+                pwddown(realdown,realup,0);
                 cat_str(realup,realdown);
-                print(realup);
+                print(realdown);
                 del_str(realup);
-                del_str(realdown);
-                del_str(sub_path);
+                del_str(realdown);;
             } else{// С корня
                 string* realdown = (string*) malloc(sizeof(string));
                 pwddown(realdown,sub_path,0);
                 print(realdown);
+                del_str(realdown);
             }
         }
         del_str(sub_path);
@@ -145,7 +146,6 @@ void pwd( ino_t this_inod, string* res )
     free(its_name);
 }
 
-// str[pos] == delim => свдинуть pos до последнего delim
 int skip_delim( string* res, int pos, char delim, int version )
 {
     if( res->str[pos] == delim ){
@@ -175,73 +175,74 @@ int is_dot( string* res )
     return !strcmp(res->str,".") || !strcmp(res->str,"..");
 }
 
-void pwddown( string* res, string* parse_path, int pos )
+void pwddown( string* res, string* parse_path, int left )
 {
     is_null(res,"pwddown");
     is_null(parse_path,"pwddown");
-    if(parse_path->str[pos] != '/'){
-        perror("Illegal path");
-        exit(1);
+
+    // Пропустить '////////' без выравнивания
+    left = skip_delim(parse_path,left,'/',1);
+    if( parse_path->str[left] == '\0' ) {
+        return;
     }
 
     string* its_name = (string*) malloc(sizeof(string));
     char_init(its_name,"");
-    // Если мы не в корне
-    while( parse_path->str[pos] != '\0' ) {
-        int left = pos + 1;
-        // К следующему /
-        int right = next_delim(parse_path,pos,'/');
-        pos = right;
-        // Скип '////////' до последнего
-        pos = skip_delim(parse_path,pos,'/',0);
-        substr(parse_path,its_name,left,right - 1);
-        struct stat stat_info;
-        stat(its_name->str, &stat_info);
-        // Файл найден
-        if(!stat(its_name->str, &stat_info)){
-            // Точки => переход
-            if( is_dot(its_name) ){
-                print_dir(its_name);
-                chdir(its_name->str);
-                print_dir(its_name);
-                del_str(its_name);
-                pwddown(res, parse_path, pos);
-                return;
-            } else if(S_ISDIR(stat_info.st_mode)){// Директория. Добавить имя => парсить
-                cat_str(res,its_name);
-                chdir(its_name->str);
-                del_str(its_name);
-                pwddown(res, parse_path, pos);
-                return;
-            } else if(S_ISREG(stat_info.st_mode)){
-                if( parse_path->str[pos] != '\0' ){// Обычный файл и не допарсили
-                    perror("No such file or directory");
-                    del_str(its_name);
-                    exit(1);
-                } else{
-                    cat_str(res,its_name);
-                    del_str(its_name);
-                    return;
-                }
-            } else if(S_ISLNK(stat_info.st_mode)){// Симв. ссылка => парсить
-                chdir(its_name->str);
-                del_str(its_name);
-                pwddown(res, parse_path, pos);
-                return;
-            } else{
-                perror("Illegal file");
+    struct stat stat_info;
+    // К следующему /
+    int right = next_delim(parse_path,left,'/');
+    substr(parse_path,its_name,left,right - 1);
+    stat(its_name->str, &stat_info);
+    // Файл найден
+    if(!stat(its_name->str, &stat_info)){
+        printf("%o\n",S_IFLNK);
+        int a = stat_info.st_mode & 0170000;
+        print_dir(its_name);
+        printf("%o\n",stat_info.st_mode & 0170000);
+        if( is_dot(its_name) ){
+            /*print_dir(its_name);*/
+            chdir(its_name->str);
+            //print_dir(its_name);
+            del_str(its_name);
+            pwddown(res, parse_path, right);
+        } else if(S_ISLNK(stat_info.st_mode)){// Симв. ссылка => парсить
+           // print_dir(its_name);
+            chdir(its_name->str);
+            //print_dir(its_name);
+            del_str(its_name);
+            pwddown(res, parse_path, right);
+        }else if(S_ISDIR(stat_info.st_mode)){// Директория. Добавить имя => парсить
+           // print_dir(its_name);
+            cat_str(res,its_name);
+            append(res,'/');
+            chdir(its_name->str);
+            //       // print_dir(its_name);
+            del_str(its_name);
+            pwddown(res, parse_path, right);
+        } else if(S_ISREG(stat_info.st_mode)){
+            if( parse_path->str[right] != '\0' ){// Обычный файл и не допарсили
+                perror("No such file or directory");
                 del_str(its_name);
                 exit(1);
+            } else{
+                cat_str(res,its_name);
+                del_str(its_name);
             }
-        } else if( parse_path->str[pos] != '\0' ){// Файла нет и не допарсили
-            perror("No such file or directory");
+        }  else{
+            perror("Illegal file");
             del_str(its_name);
             exit(1);
-        } else{
-            // / Файла нет и допарсили
-            cat_str(res,its_name);
-            del_str(its_name);
         }
+        // Точки => переход
+    } else if( parse_path->str[right] != '\0' ){// Файла нет и не допарсили
+        perror("No such file or directory");
+        del_str(its_name);
+        exit(1);
+    } else{
+        // / Файла нет и допарсили
+        cat_str(res,its_name);
+        append(res,'/');
+        del_str(its_name);
     }
 }
 // Найти в катологе файл с данным inod(inode_to_find) и скопировать его в name_buf
