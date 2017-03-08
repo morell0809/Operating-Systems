@@ -1,6 +1,7 @@
 //
 // Created by morell on 19.02.17.
 //
+
 #include <stdio.h>
 #include <libgen.h>
 #include "strings.h"
@@ -24,18 +25,21 @@ int main()
 {
     string* input = (string*) malloc(sizeof(string));
     read_str(input);
-    if(input->len){
+
+    if(input->len) {
         // След.позиция в input для чтения sub_path
         int read_pos = 0;
         // Путь до пробела
         string* sub_path = (string*) malloc(sizeof(string));
-        while( input->str[read_pos] ){
+        while( input->str[read_pos] ) {
+
             int left = read_pos;
             int right = next_delim(input,read_pos,' ');
             read_pos = skip_delim(input,right,' ', 1);
             substr(input,sub_path,left,right - 1);
             // Идем не с корня
-            if(sub_path->str[0] != '/' ){
+            if(sub_path->str[0] != '/' ) {
+
                 string* realup = (string*) malloc(sizeof(string));
                 string* realdown = (string*) malloc(sizeof(string));
                 front_add(&sub_path,"/");
@@ -55,59 +59,24 @@ int main()
                 print(realdown);
                 del_str(realup);
                 del_str(realdown);;
-            } else{// С корня
+
+            } else {// С корня
+                chdir('/');
+                print_dir_char("/");
                 string* realdown = (string*) malloc(sizeof(string));
+
                 pwddown(realdown,sub_path,0);
                 print(realdown);
                 del_str(realdown);
+
             }
         }
         del_str(sub_path);
-        /*int dot_count = 0;// # точек
-        int i = 0;
-        while(input->str[i] !='/'){
-            if( input->str[i] == '.'){
-                dot_count++;
-            }
-        }
-        if( dot_count == 1 ){
 
-        } else if( dot_count == 2){
+    } else {
 
-        } else if (dot_count == 0 && input->str[0] == '/' ){
-            //root
-        } else{
-            // Копирование имени проверяемой директории
-            string* check_file = (string*) malloc(sizeof(string));
-            substr(input,check_file,0,i-1);
-            // Проверка совпадения имен директорий
-            int cur_inode = get_inode(".");
-            chdir("..");
-            string* its_name = (string*) malloc(sizeof(string));
-
-            inum_to_name(cur_inode,its_name,BUFSIZ);
-            // Директория сущ.
-            if( !strcmp(its_name,check_file)){
-                // Вверх
-                pwd(get_inode("."),realup);
-                // Вниз
-                pwddown()
-            } else{// Не сущ.
-                // После '/' ничего нет
-                if( i == input->len - 1 ){
-                    chdir(its_name->str);
-                    // Вверх
-                    pwd(get_inode("."),realup);
-                    print(realup);
-                } else{// Есть
-                    perror("");
-                    exit(1);
-                }
-            }
-        }*/
-
-    } else{
         printf("%s\n","realpath: missing operand");
+
     }
     del_str(input);
     return 0;
@@ -116,31 +85,40 @@ int main()
 void is_null( string* res, char* name_func)
 {
     if(!res) {
+
         perror("res is NULL in ");
         perror(name_func);
         exit(1);
+
     }
 }
 void pwd( ino_t this_inod, string* res )
 {
     if(!res) {
+
         perror("res is NULL in print_path");
         exit(1);
+
     }
     ino_t my_inode;
     string* its_name = (string*) malloc(sizeof(string));
     // Если мы не в корне
     int check = get_inode("..");
     if( check != this_inod ) {
-        if(!chdir("..") ){// Вверх по катоологу
+
+        if(!chdir("..") ) {// Вверх по катоологу
+
             inum_to_name(this_inod,its_name,BUFSIZ);// Получить имя католога
             reverse(its_name);
             cat_str(res,its_name);
             append(res,'/');
             my_inode = get_inode(".");
             pwd(my_inode,res);
-        } else{
+
+        } else {
+
             fprintf(stderr,"Bad up");
+
         }
     }
     free(its_name);
@@ -148,12 +126,16 @@ void pwd( ino_t this_inod, string* res )
 
 int skip_delim( string* res, int pos, char delim, int version )
 {
-    if( res->str[pos] == delim ){
-        while(res->str[pos] == delim ){
+    if( res->str[pos] == delim ) {
+        while(res->str[pos] == delim ) {
+
             pos++;
+
         }
-        if( !version ){
+        if( !version ) {
+
             pos--;
+
         }
     }
     return pos;
@@ -161,11 +143,15 @@ int skip_delim( string* res, int pos, char delim, int version )
 
 int next_delim( string* res, int pos, char delim )
 {
-    if(res->str[pos] == delim){
+    if(res->str[pos] == delim) {
+
         pos++;
+
     }
-    while(res->str[pos] != delim && res->str[pos] != '\0' ){
+    while(res->str[pos] != delim && res->str[pos] != '\0' ) {
+
         pos++;
+
     }
     return pos;
 }
@@ -183,7 +169,9 @@ void pwddown( string* res, string* parse_path, int left )
     // Пропустить '////////' без выравнивания
     left = skip_delim(parse_path,left,'/',1);
     if( parse_path->str[left] == '\0' ) {
+
         return;
+
     }
 
     string* its_name = (string*) malloc(sizeof(string));
@@ -192,26 +180,32 @@ void pwddown( string* res, string* parse_path, int left )
     // К следующему /
     int right = next_delim(parse_path,left,'/');
     substr(parse_path,its_name,left,right - 1);
-    stat(its_name->str, &stat_info);
+    print_dir_char(".");
     // Файл найден
-    if(!stat(its_name->str, &stat_info)){
+    if(!stat(its_name->str, &stat_info)) {
+
         printf("%o\n",S_IFLNK);
         int a = stat_info.st_mode & 0170000;
         print_dir(its_name);
         printf("%o\n",stat_info.st_mode & 0170000);
-        if( is_dot(its_name) ){
+        if( is_dot(its_name) ) {
+
             /*print_dir(its_name);*/
             chdir(its_name->str);
             //print_dir(its_name);
             del_str(its_name);
             pwddown(res, parse_path, right);
-        } else if(S_ISLNK(stat_info.st_mode)){// Симв. ссылка => парсить
+
+        } else if(S_ISLNK(stat_info.st_mode)) {// Симв. ссылка => парсить
+
            // print_dir(its_name);
             chdir(its_name->str);
             //print_dir(its_name);
             del_str(its_name);
             pwddown(res, parse_path, right);
-        }else if(S_ISDIR(stat_info.st_mode)){// Директория. Добавить имя => парсить
+
+        } else if(S_ISDIR(stat_info.st_mode)) {// Директория. Добавить имя => парсить
+
            // print_dir(its_name);
             cat_str(res,its_name);
             append(res,'/');
@@ -219,38 +213,51 @@ void pwddown( string* res, string* parse_path, int left )
             //       // print_dir(its_name);
             del_str(its_name);
             pwddown(res, parse_path, right);
-        } else if(S_ISREG(stat_info.st_mode)){
-            if( parse_path->str[right] != '\0' ){// Обычный файл и не допарсили
+
+        } else if(S_ISREG(stat_info.st_mode)) {
+            if( parse_path->str[right] != '\0' ) {// Обычный файл и не допарсили
+
                 perror("No such file or directory");
                 del_str(its_name);
                 exit(1);
-            } else{
+
+            } else {
+
                 cat_str(res,its_name);
                 del_str(its_name);
+
             }
-        }  else{
+        } else {
+
             perror("Illegal file");
             del_str(its_name);
             exit(1);
+
         }
         // Точки => переход
-    } else if( parse_path->str[right] != '\0' ){// Файла нет и не допарсили
+    } else if( parse_path->str[right] != '\0' ) {// Файла нет и не допарсили
+
         perror("No such file or directory");
         del_str(its_name);
         exit(1);
-    } else{
+
+    } else {
+
         // / Файла нет и допарсили
         cat_str(res,its_name);
         append(res,'/');
         del_str(its_name);
+
     }
 }
 // Найти в катологе файл с данным inod(inode_to_find) и скопировать его в name_buf
 void inum_to_name(ino_t inode_to_find, string* its_name, int size )
 {
     if(!its_name) {
+
         perror("its_name is NULL");
         exit(1);
+
     }
 
     DIR* dir_ptr = 0;
@@ -258,15 +265,19 @@ void inum_to_name(ino_t inode_to_find, string* its_name, int size )
 
     dir_ptr = opendir(".");
     if( !dir_ptr ) {
+
         perror("Bad open '.'");
         exit(1);
+
     }
     // Ищем католог для файла с заданным inode_to_find
     while((direntp = readdir(dir_ptr)) != 0 ) {
         if( direntp->d_ino == inode_to_find ) {
+
             char_init(its_name,direntp->d_name);
             closedir(dir_ptr);
             return;
+
         }
     }
 
@@ -274,37 +285,18 @@ void inum_to_name(ino_t inode_to_find, string* its_name, int size )
     exit(1);
 }
 
-/*// Найти в катологе файл с данным inod(inode_to_find) и скопировать его в name_buf
-ino_t find_inum(string* its_name )
-{
-    is_null(its_name,"find_inum");
-
-    DIR* dir_ptr = 0;
-    struct dirent* direntp = 0;
-    dir_ptr = opendir(".");
-    if( !dir_ptr ) {
-        perror("Bad open '.'");
-        exit(1);
-    }
-    // Ищем католог с заданным its_name
-    *//*while((direntp = readdir(dir_ptr)) != 0 ) {
-        if( !strcmp(direntp->d_name,its_name->str) ) {
-            closedir(dir_ptr);
-            return direntp->d_ino;
-        }
-    }*//*
-
-
-    fprintf(stderr,"Error find inode");
-    exit(
-}*/
 ino_t get_inode(char* file_name)
 {
     struct stat stat_info;
-    if(!stat(file_name, &stat_info)){
+    if(!stat(file_name, &stat_info)) {
+
         return stat_info.st_ino;
+
     } else {
+
         perror("Error stat");
         exit(1);
+
     }
 }
+
