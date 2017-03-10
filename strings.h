@@ -18,7 +18,7 @@ const int DEF_MAXSIZE = BUFSIZ;
 
 typedef struct Str {
     //Зам. всегда динамич. выделение памяти
-    char *str;
+    char* str;
     int len;
     int cap;
     // Индекс начиная с которго можно писать.
@@ -27,13 +27,13 @@ typedef struct Str {
 } string;
 
 // Зам. Проверка пустоты по length
-int empty_len(const string *val) {
+int empty_len(const string* val) {
     if (val->len == 0) { return 1; }
     else { return 0; }
 }
 
 // Зам. Проверка пустоты по capacity
-int empty_cap(const string *val) {
+int empty_cap(const string* val) {
     if (val->cap == 0) { return 1; }
     else { return 0; }
 }
@@ -45,14 +45,14 @@ int empty_cap(const string *val) {
 // res - всегда динам.выделение памяти, val - стек || динам.
 
 // Инициализация res строкой val type:char*
-void char_init(string *res, char *val, int capacity) {
+void char_init(string* res, char* val, int capacity) {
     if (!val || !res) {
         perror("val is NULL");
         exit(1);
     }
 
     int length = strlen(val);
-    res->str = (char *) malloc((length + capacity + 1) * sizeof(char));
+    res->str = (char*) malloc((length + capacity + 1) * sizeof(char));
     res->len = length;
     res->cap = res->len + capacity;
     res->pos = res->len;
@@ -65,7 +65,7 @@ void char_init(string *res, char *val, int capacity) {
 }
 
 // Инициализация res через val
-void string_init(string *res, const string *val) {
+void string_init(string* res, const string* val) {
     if (!val || !res || !val->str) {
 
         perror("val is NULL");
@@ -74,7 +74,7 @@ void string_init(string *res, const string *val) {
     }
 
     const int add_space = 10;
-    res->str = (char *) malloc((val->len + add_space + 1) * sizeof(char));
+    res->str = (char*) malloc((val->len + add_space + 1) * sizeof(char));
     res->len = val->len;
     res->cap = res->len + add_space;
     res->pos = res->len;
@@ -89,7 +89,7 @@ void string_init(string *res, const string *val) {
 // Копирует в dest строку from
 // Зам: dest.cap >= from.cap
 // dest - всегда динам.выделение памяти, from - стек || динам.
-void copy_str(string *dest, const string *from) {
+void copy_str(string* dest, const string* from) {
     if (!dest || !from || !from->str) {
 
         perror("val is NULL");
@@ -112,7 +112,7 @@ void copy_str(string *dest, const string *from) {
         if (dest->cap <= from->len) {
 
             free(dest->str);
-            dest->str = (char *) malloc((2 * from->cap + 1) * sizeof(char));
+            dest->str = (char*) malloc((2 * from->cap + 1) * sizeof(char));
             dest->len = from->len;
             dest->cap = 2 * from->cap;
             dest->pos = from->len;
@@ -131,7 +131,7 @@ void copy_str(string *dest, const string *from) {
 
 // Конкатенация res и val
 // Зам. res - всегда динам.выделение памяти, val - стек || динам.
-void cat_str(string *res, const string *const val) {
+void cat_str(string* res, const string* const val) {
     if (!val || !res || !val->str) {
 
         perror("val is NULL");
@@ -146,7 +146,7 @@ void cat_str(string *res, const string *const val) {
             // Новое cap для res
             int newcap = 2 * (res->len + val->len);
             // tmp - временная строка для копирования
-            char *tmp = (char *) malloc((newcap + 1) * sizeof(char));
+            char* tmp = (char*) malloc((newcap + 1) * sizeof(char));
             // Копируем в tmp старый res
             if (res->len) {
 
@@ -184,7 +184,7 @@ void cat_str(string *res, const string *const val) {
 }
 
 // Очистить поля
-void clear_str(string *val) {
+void clear_str(string* val) {
     if (val->str) {
 
         free(val->str);
@@ -197,7 +197,7 @@ void clear_str(string *val) {
 }
 
 // Удалить структуру
-void del_str(string *val) {
+void del_str(string* val) {
     if (val) {
 
         clear_str(val);
@@ -207,14 +207,14 @@ void del_str(string *val) {
 }
 
 // Увеличить размер val на add символов
-string *resize(string *val, const int add) {
+string* resize(string* val, const int add) {
     if (!val || !val->str) {
 
         perror("val is NULL");
         exit(1);
 
     }
-    string *tmp = (string *) malloc(sizeof(string));
+    string* tmp = (string*) malloc(sizeof(string));
     tmp->str = malloc((val->cap + add + 1) * sizeof(char));
     copy_str(tmp, val);
     del_str(val);
@@ -222,7 +222,7 @@ string *resize(string *val, const int add) {
     return tmp;
 }
 
-void append(string *val, char c) {
+void append(string* val, char c) {
     if (!val) {
 
         perror("val is NULL");
@@ -245,12 +245,12 @@ void append(string *val, char c) {
     val->str[val->len] = '\0';
 }
 
-void print(const string *val) {
+void print(const string* val) {
     printf("%s\n", val->str);
 }
 
 // Читает с stdin строк длины ull в res
-void read_str(string *res) {
+void read_str(string* res) {
     if (!res) {
 
         perror("res is NULL in read_str");
@@ -266,11 +266,11 @@ void read_str(string *res) {
     res->pos = read - 1;
 }
 
-int read_one_str(string *res, FILE **from) {
+int read_one_str(string* res, FILE* from) {
 
     if (!res) {
 
-        perror("res is NULL in read_str");
+        perror("read_one_str: res is NULL in read_str\n");
         exit(1);
 
     }
@@ -278,8 +278,10 @@ int read_one_str(string *res, FILE **from) {
     res->str = 0;
     size_t mem_size = BUFSIZ;
     ssize_t read = 0;
-    if (from[0]) {
-        read = getline(&res->str, &mem_size, from[0]);
+
+    if (from) {
+        // Предполагается, что from открыт
+        read = getline(&res->str, &mem_size, from);
     } else {
         read = getline(&res->str, &mem_size, stdin);
     }
@@ -293,7 +295,6 @@ int read_one_str(string *res, FILE **from) {
         res->len = read - 1;
         res->cap = read;
         res->pos = read - 1;
-        printf("%s", res->str);
         char c = 'a';
         for (int i = 0; i < res->len; i++) {
             c = res->str[i];
@@ -308,7 +309,7 @@ int read_one_str(string *res, FILE **from) {
 
 }
 
-void reverse(string *res) {
+void reverse(string* res) {
     if (!res) {
 
         perror("val is NULL");
@@ -325,7 +326,7 @@ void reverse(string *res) {
     }
 }
 
-int cmp_str(string *left, string *right) {
+int cmp_str(string* left, string* right) {
     if (!left || !right) {
 
         perror("left is  NULL in equal_str");
@@ -336,7 +337,7 @@ int cmp_str(string *left, string *right) {
 }
 
 // Копирует from[left,right] в dest
-void substr(string *from, string *dest, int left, int right) {
+void substr(string* from, string* dest, int left, int right) {
     if (!from || !dest) {
 
         perror("from || dest is NULL in substr");
@@ -349,7 +350,7 @@ void substr(string *from, string *dest, int left, int right) {
             free(dest->str);
 
         }
-        dest->str = (char *) malloc(right - left + 2);
+        dest->str = (char*) malloc(right - left + 2);
         dest->len = right - left + 1;
         dest->cap = right - left + 1;
         dest->pos = -1;
@@ -368,23 +369,23 @@ void substr(string *from, string *dest, int left, int right) {
     dest->str[right - left + 1] = '\0';
 }
 
-void front_add(string **val, char *front) {
+void front_add(string** val, char* front) {
     if (!val || !*val || !(*val)->str) {
 
         perror("val is NULL");
         exit(1);
 
     }
-    string *tmp = (string *) malloc(sizeof(string));
+    string* tmp = (string*) malloc(sizeof(string));
     int front_len = strlen(front);
     if ((*val)->cap - (*val)->len < DEF_MAXSIZE * 0.1) {
 
-        tmp->str = (char *) malloc(((*val)->len + front_len + DEF_MAXSIZE + 1) * sizeof(char));
+        tmp->str = (char*) malloc(((*val)->len + front_len + DEF_MAXSIZE + 1) * sizeof(char));
         tmp->cap = (*val)->len + front_len + DEF_MAXSIZE;
 
     } else {
 
-        tmp->str = (char *) malloc(((*val)->len + front_len + 1) * sizeof(char));
+        tmp->str = (char*) malloc(((*val)->len + front_len + 1) * sizeof(char));
         tmp->cap = (*val)->len + front_len;
 
     }

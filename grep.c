@@ -1,54 +1,78 @@
 //
 // Created by morell on 06.03.17.
 //
+#include <getopt.h>
 #include "strings.h"
 #include "grep.h"
-#include "test.h"
-
 
 int main(int argc, char** argv) {
 
-    string* input = malloc(sizeof(string));
-    string* path = malloc(sizeof(string));
-    string* str_tmp = malloc(sizeof(string));
 
-    // Вектор файлов на чтение. path[0] == 0 => читаем с stdin
-    int count_path =  1;
-    FILE** from = malloc(sizeof(FILE*) * count_path);
-    from[0] = 0;
-    read_one_str(input, from);
-    read_one_str(path, from);
-    read_one_str(str_tmp, from);
-
-    // Аргументы
+    int val;
+    char c;
     const int count_opt = 2;
     int* options = malloc(sizeof(int) * count_opt);
-    for (int i = 0; i < input->len; i++) {
-        switch (input->str[i]) {
+    for (int i = 0; i < count_opt; i++) {
+        options[i] = 0;
+    }
+
+    // Парсинг аргументов
+    while ((val = getopt(argc, argv, "vi")) != -1) {
+        switch (val) {
             case 'i':
-                printf("i");
                 options[0] = 1;
                 break;
             case 'v':
-                printf("v");
                 options[1] = 1;
                 break;
-            default :
+            case '?':
+                c = val;
+                printf("Illegal arg: %c", c);
                 break;
         }
     }
 
-    FILE* path_worker = fopen(path->str, "r+");
     string* str_text = malloc(sizeof(string));
     char_init(str_text, "", BUFSIZ);
-    from[0] = path_worker;
+    // После разбора аргументов optind должен указывать на шаблон
+    // Чтение stdin. optind == #аргументов
 
-    print_array(options, count_opt, stdout);
-    while (read_one_str(str_text, from) != -1) {
-        if (kmp(str_tmp, str_text, options)) {
-            printf("%s\n", str_text->str);
+    if( optind == argc ) {
+
+        printf("Usage: grep [OPTION]... PATTERN [FILE]...\n");
+
+    } else if (optind + 1 < argc) {
+        // Optind указывает на шаблон => начало с optind + 1
+        for (int i = optind + 1; i < argc; i++) {
+            FILE* input = fopen(argv[i], "r");
+            if (!input) {
+
+                perror("grep:");
+                continue;
+
+            }
+            while (read_one_str(str_text, input) != -1) {
+                string* tmp = malloc(sizeof(string));
+                char_init(tmp, argv[optind], BUFSIZ);
+                if (kmp(tmp, str_text, options)) {
+
+                    printf("%s: %s\n", argv[i], str_text->str);
+
+                }
+            }
+            fclose(input);
+        }
+
+    } else { // Иначе пробуем открывать поэтапно файлы
+
+        while (read_one_str(str_text, 0) != -1) {
+            string* tmp = malloc(sizeof(string));
+            char_init(tmp, argv[optind], BUFSIZ);
+            if (kmp(tmp, str_text, options)) {
+                printf("stdout: %s\n", str_text->str);
+            }
         }
     }
-
+    del_str(str_text);
     return 0;
 }

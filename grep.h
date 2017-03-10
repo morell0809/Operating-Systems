@@ -6,6 +6,7 @@
 #define STRINGS_GREP_H
 
 #include <ctype.h>
+#include "strings.h"
 
 // Префикс функция. argv[0] == i. argv[1] == v.
 int* pref_func(const string* const val, int* argv) {
@@ -25,8 +26,6 @@ int* pref_func(const string* const val, int* argv) {
         }
         v1 = val->str[i] == val->str[pos];
         v2 = tolower(val->str[i]) == tolower(val->str[pos]);
-        printf("cal:%d  iter:%d\n", call, iter);
-        fflush(stdout);
         // Конструкция с argv позволяет
         // выбирать: есть параметр --i или нет.
         if (!argv[0] && v1 || argv[0] && v2) {
@@ -51,7 +50,6 @@ int kmp(const string* tmp, const string* const text, int* argv) {
     cat_str(worker, text);
 
     int* pref = pref_func(worker, argv);
-    print_array(pref, worker->len, stdout);
 
     for (int i = 0; i < text->len; i++) {
         if (pref[i + tmp_len + 1] == tmp_len) {

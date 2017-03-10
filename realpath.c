@@ -21,11 +21,11 @@ int next_delim( string* res, int pos, char delim );
 // Нижн.путь
 void pwddown( string* res, string* parse_path, int pos );
 
-int main()
+int main( int argc, int* argv[] )
 {
     string* input = (string*) malloc(sizeof(string));
     read_str(input);
-
+    
     if(input->len) {
         // След.позиция в input для чтения sub_path
         int read_pos = 0;
@@ -92,6 +92,7 @@ void is_null( string* res, char* name_func)
 
     }
 }
+
 void pwd( ino_t this_inod, string* res )
 {
     if(!res) {

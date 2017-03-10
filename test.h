@@ -5,27 +5,40 @@
 #ifndef STRINGS_TEST_H
 #define STRINGS_TEST_H
 
-#include "strings.h"
-#include "grep.h"
 
-void test_func() {
+#include "stdio.h"
+#include <stdlib.h>
 
-    int *arg = malloc(sizeof(int) * 10);
-    arg[0] = 1;
-    arg[1] = 1;
+void test_func(int argc, char** argv) {
 
-    string *text = malloc(sizeof(string));
-    char_init(text, "Hello  myfriend", BUFSIZ);
-    int* pref = pref_func(text,arg);
-    print_array(pref,text->len,stdout);
-    string *tmp = malloc(sizeof(string));
-    char_init(tmp, "hello", BUFSIZ);
-    int* before = arg;
+    int val;
+    int count = 0;
 
+    printf("Hello\n");
+    for( int i = 0; i < argc; i++ ){
+        printf("%s\n",argv[i]);
+    }
+    printf("\n");
+    while( (val = getopt(argc,argv,"vi")) != -1 ){
+        switch (val){
+            case 'i':
+                printf("i param\n");
+                break;
+            case 'v':
+                printf("v param\n");
+                break;
+            case '?':
+                printf("error statement");
+                break;
+            default:
+                printf("default");
+        }
+        printf("optind: %d\n", optind);
+        count++;
+        fflush(stdout);
+    }
+    printf("END optind: %d\n", optind);
 
-    int yes = kmp(tmp, text, arg);
-    printf("yes: %d", yes);
-    fflush(stdout);
 }
 
 #endif //STRINGS_TEST_H
