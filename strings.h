@@ -44,6 +44,16 @@ int empty_cap(const string* val) {
 // val - не пуст => откопировать val в res; capacity - забито
 // res - всегда динам.выделение памяти, val - стек || динам.
 
+void is_null(string* res, char* name_func) {
+    if (!res) {
+
+        perror("res is NULL in ");
+        perror(name_func);
+        exit(1);
+
+    }
+}
+
 // Инициализация res строкой val type:char*
 void char_init(string* res, char* val, int capacity) {
     if (!val || !res) {
@@ -336,6 +346,16 @@ int cmp_str(string* left, string* right) {
     return strcmp(left->str, right->str);
 }
 
+int cmp_char(string* left, char* right) {
+    if (!left || !right) {
+
+        perror("left is  NULL in equal_str");
+        exit(1);
+
+    }
+    return strcmp(left->str, right);
+}
+
 // Копирует from[left,right] в dest
 void substr(string* from, string* dest, int left, int right) {
     if (!from || !dest) {
@@ -405,6 +425,38 @@ void front_add(string** val, char* front) {
     del_str(*val);
     *val = tmp;
 }
+
+// Вырезать из val [leff,right)
+void erase(string** val, int left, int right)
+{
+    is_null(*val,"erase");
+
+    string* tmp = (string*) malloc(sizeof(string));
+    char_init(tmp,"",(*val)->cap);
+    for( int i = 0; i < left; i++ ) {
+        tmp->str[i] = (*val)->str[i];
+    }
+    for( int i = right; i < (*val)->len; i++ ) {
+        tmp->str[left + i - right] = (*val)->str[i];
+    }
+    tmp->len = (*val)->len - ( right - left );
+    tmp->cap = (*val)->cap;
+    tmp->pos = tmp->len;
+    del_str(*val);
+    *val = tmp;
+}
+
+void print_dir()
+{
+    DIR* dir_ptr = 0;
+    struct dirent *direntp;
+    dir_ptr = opendir(".");
+    is_null(dir_ptr,"print_dir");
+    while((direntp = readdir(dir_ptr))){
+        printf("%s\n",direntp->d_name);
+    }
+}
+
 
 
 #endif //STRINGS_STRINGS_H
